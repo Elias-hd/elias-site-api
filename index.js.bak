@@ -1,0 +1,85 @@
+var express = require('express'),
+    cors = require('cors'),
+    secure = require('ssl-express-www');
+const PORT = process.env.PORT || 8080 || 5000 || 3000
+var { color } = require('./lib/color.js')
+
+function ApiKeyAut(req, res, next) {
+const token = req.query.token;
+const ApiKeyB = keyprem.find(key => key.token === token);
+if (!token) {
+return res.status(401).json({ message: '⚠️ falta do parâmetro token - coloque o paramentro token.' });
+}
+if (!ApiKeyB) {
+return res.status(401).json({ message: '✖️ token Inválido - Entre em contato com o wa.me//5544920016171 para solucionar o problema ou registrar seu token.' });
+}
+const now = new Date();
+const TempoDeIns = new Date(ApiKeyB.TempoDeIns);
+if (now > TempoDeIns) {
+return res.status(401).json({ message: '⌚ token expirado - Entre em contato com o wa.me//5544920016171 para solucionar o problema.' });
+}
+next();
+}
+
+app.get('/api/addtoken', async (req, res) => {
+tokenadd = req.query.tokenadd
+exptemp = req.query.exptemp
+senha = req.query.senha
+senhaadm = ["Elias-Modder-Hacker"]
+if (!tokenadd) { return res.status(401).json({ message: '⚠️ falta do parâmetro tokenadd - coloque o paramentro tokenadd.' });}
+if (!exptemp) { return res.status(401).json({ message: '⚠️ falta do parâmetro exptemp - coloque o paramentro exptemp.' });}
+if (!senha) { return res.status(401).json({ message: '⚠️ falta do parâmetro senha - coloque o paramentro senha.' });}
+if(!senha.includes(senhaadm))return res.json({status:false,msg:'Senha inválida!!! koe parceiro, se não for adm vaza daqui 🧐'})
+const now = new Date();
+keyprem.push({
+token: tokenadd,
+TempoDeIns: exptemp,
+});
+fs.writeFileSync('./keys.json', JSON.stringify(keyprem))
+res.json({ tokenadd, exptemp });
+});
+/// api/deltoken?tokendel=⤹🎠ꪾ͢🔥Braia&senha=Elias-Modder-Hacker
+app.get('/api/deltoken', (req, res) => {
+const tokendel = req.query.tokendel;
+const senha = req.query.senha;
+const senhaadm = ["Elias-Modder-Hacker"]
+if (!tokendel) {
+return res.status(401).json({ message: '⚠️ Falta do parâmetro tokendel - Informe o parâmetro tokendel.' });
+}
+if (!senha) {
+return res.status(401).json({ message: '⚠️ Falta do parâmetro senha - Informe o parâmetro senha.' });
+}
+if (!senhaadm.includes(senha)) {
+    return res.json({ status: false, msg: 'Senha inválida!!! Apenas administradores podem executar esta ação.' });
+}
+const keyIndex = keyprem.findIndex(key => key.token === tokendel);
+if (keyIndex === -1) {
+return res.status(404).json({ message: 'API Key não encontrada.' });
+}
+keyprem.splice(keyIndex, 1);
+fs.writeFileSync('./keys.json', JSON.stringify(keyprem));
+res.json({ message: 'API Key removida com sucesso.' });
+});
+
+var mainrouter = require('./routes/main'),
+    apirouter = require('./routes/api')
+
+var app = express()
+app.enable('trust proxy');
+app.set("json spaces",2)
+app.use(cors())
+app.use(secure)
+app.use(express.static("public"))
+
+app.use('/', mainrouter)
+app.use('/api', apirouter)
+
+
+
+
+
+app.listen(PORT, () => {
+    console.log(color("Servidor rodando na porta " + PORT,'green'))
+})
+
+module.exports = app
